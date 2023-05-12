@@ -1,11 +1,20 @@
 import json
+
 from structures import Atlas
+
 import matplotlib.pyplot as plt
 import numpy as np
+from tkinter import *
+from tkinter import ttk
 
 class AtlasProcessor:
     def __init__(self) -> None:
         self.atlas = Atlas()
+        # self.root = Tk()
+        # self.frame = ttk.Frame(self.root, padding=10)
+        # self.frame.grid()
+        # ttk.Button(self.frame, text="Quit", command=self.root.destroy).grid(column=1, row=0)
+        # self.root.mainloop()
     
     def addAnnotation(self, filepath):
         f = open(filepath)
@@ -43,8 +52,9 @@ class AtlasProcessor:
             minY = min(minY, min(y))
             maxY = max(maxY, max(y))
 
-            ax.scatter(x, y, z)
+            ax.scatter(x, y, z, label=organName)
         ax.set_xlim(minX, maxX)
         ax.set_ylim(minY, maxY)
         ax.set_zlim(0, 1000)
+        ax.legend()
         plt.show()
