@@ -9,13 +9,13 @@ class Atlas:
 
 
 class Organ:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.pointCloud = []
         self.colour = 0xffffff
         # TODO: add self.mesh for 3D structures
     
-    def addPoint(self, point: list):
+    def addPoint(self, point: list) -> None:
         self.pointCloud.append(point)
 
     def linearizeDims(self):

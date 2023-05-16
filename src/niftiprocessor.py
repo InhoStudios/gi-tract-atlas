@@ -22,3 +22,12 @@ ax.set_xlim(0, 600)
 ax.set_ylim(0, 600)
 ax.set_zlim(0, 600)
 plt.show()
+
+# class NIFTIManager:
+#     def __init__(self) -> None:
+#         self.nii_images = {}
+#         pass
+
+#     def importImage(self, path, name):
+#         img = nib.load(path)
+#         self.nii_images[name] = img

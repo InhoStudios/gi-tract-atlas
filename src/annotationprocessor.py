@@ -10,6 +10,8 @@ from tkinter import ttk
 class AtlasProcessor:
     def __init__(self) -> None:
         self.atlas = Atlas()
+        self.calibration: int = None
+        self.calibrationFile = ""
         # self.root = Tk()
         # self.frame = ttk.Frame(self.root, padding=10)
         # self.frame.grid()
@@ -17,6 +19,12 @@ class AtlasProcessor:
         # self.root.mainloop()
     
     def addAnnotation(self, filepath):
+        if (self.calibration == None):
+            print("Calibration not set yet. Please update calibration before adding annotations")
+            return
+        if (filepath == self.calibrationFile):
+            print("Calibration file. Skipping...")
+            return
         f = open(filepath)
         annotation = json.load(f)[0]
 
@@ -25,7 +33,7 @@ class AtlasProcessor:
 
         # TODO: parse name to get depth
         # TEMP NAME PARSING
-        z = int(fname.split('.')[0][-1]) * 50
+        z = int(fname.split('.')[0][-1]) * self.calibration
 
         for entity in annotation["annotation"]["annotationGroups"][0]["annotationEntities"]:
             eName = entity["name"]
@@ -37,6 +45,21 @@ class AtlasProcessor:
                 point.append(z)
                 organ.addPoint(point)
         f.close()
+        return
+    
+    def calibrate(self, calibrationAnnotation, numZslices):
+        f = open(calibrationAnnotation)
+        annotation = json.load(f)[0]
+        body = annotation["annotation"]["annotationGroups"][0]["annotationEntities"][0]
+        zvals = []
+        for point in body["annotationBlocks"][0]["annotations"][0]["segments"][0]:
+            zvals.append(point[1])
+        minZ = min(zvals)
+        maxZ = max(zvals)
+        diff = maxZ - minZ
+        self.calibration = diff / numZslices
+        self.calibrationFile = calibrationAnnotation
+        return self.calibration
 
     def viewAnnotation(self):
         ax = plt.axes(projection="3d")
@@ -53,8 +76,10 @@ class AtlasProcessor:
             maxY = max(maxY, max(y))
 
             ax.scatter(x, y, z, label=organName)
-        ax.set_xlim(minX, maxX)
-        ax.set_ylim(minY, maxY)
-        ax.set_zlim(0, 1000)
+        minDim = min(minX, minY)
+        maxDim = max(maxX, maxY)
+        ax.set_xlim(minDim, maxDim)
+        ax.set_ylim(minDim, maxDim)
+        ax.set_zlim(0, maxDim - minDim)
         ax.legend()
         plt.show()
