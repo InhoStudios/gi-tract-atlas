@@ -12,6 +12,7 @@ class AtlasProcessor:
         self.atlas = Atlas()
         self.calibration: int = None
         self.calibrationFile = ""
+        self.shownOrgans = []
         # self.root = Tk()
         # self.frame = ttk.Frame(self.root, padding=10)
         # self.frame.grid()
@@ -45,6 +46,7 @@ class AtlasProcessor:
                 point.append(z)
                 organ.addPoint(point)
         f.close()
+        self.shownOrgans = list(self.getCategories())
         return
     
     def calibrate(self, calibrationAnnotation, numZslices):
@@ -62,12 +64,16 @@ class AtlasProcessor:
         return self.calibration
 
     def viewAnnotation(self):
-        ax = plt.axes(projection="3d")
-        minX = np.inf
+        self.setAnnotationFig(plt)
+        plt.show()
+
+    def setAnnotationFig(self, fig):
+        ax = fig.add_subplot(projection="3d")
+        minX = 10000
         maxX = 0
-        minY = np.inf
+        minY = 10000
         maxY = 0
-        for organName in self.atlas.organs:
+        for organName in self.shownOrgans:
             organ = self.atlas.organs[organName]
             x, y, z = organ.linearizeDims()
             minX = min(minX, min(x))
@@ -82,4 +88,13 @@ class AtlasProcessor:
         ax.set_ylim(minDim, maxDim)
         ax.set_zlim(0, maxDim - minDim)
         ax.legend()
-        plt.show()
+    
+    def toggleCategory(self, name):
+        if name in self.shownOrgans:
+            self.shownOrgans.remove(name)
+        else:
+            self.shownOrgans.append(name)
+    
+    def getCategories(self):
+        return self.atlas.organs.keys()
+        

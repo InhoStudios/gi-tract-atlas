@@ -11,19 +11,14 @@ class Atlas:
 class Organ:
     def __init__(self, name: str) -> None:
         self.name = name
-        self.pointCloud = []
         self.colour = 0xffffff
+        self.axes = {"x":[], "y":[], "z":[]}
         # TODO: add self.mesh for 3D structures
     
     def addPoint(self, point: list) -> None:
-        self.pointCloud.append(point)
+        self.axes["x"].append(point[0])
+        self.axes["y"].append(point[1])
+        self.axes["z"].append(point[2])
 
     def linearizeDims(self):
-        x = []
-        y = []
-        z = []
-        for point in self.pointCloud:
-            x.append(point[0])
-            y.append(point[1])
-            z.append(point[2])
-        return x, y, z
+        return self.axes["x"], self.axes["y"], self.axes["z"]
