@@ -13,6 +13,10 @@ class AtlasProcessor:
         self.calibration: int = None
         self.calibrationFile = ""
         self.shownOrgans = []
+        self.scale = 1.0
+        self.offsetX = 0
+        self.offsetY = 0
+        self.offsetZ = 0
         # self.root = Tk()
         # self.frame = ttk.Frame(self.root, padding=10)
         # self.frame.grid()
@@ -58,7 +62,7 @@ class AtlasProcessor:
             zvals.append(point[1])
         minZ = min(zvals)
         maxZ = max(zvals)
-        diff = maxZ - minZ
+        diff = maxZ - minZ + 150
         self.calibration = diff / numZslices
         self.calibrationFile = calibrationAnnotation
         return self.calibration
@@ -67,8 +71,30 @@ class AtlasProcessor:
         self.setAnnotationFig(plt)
         plt.show()
 
-    def setAnnotationFig(self, fig):
-        ax = fig.add_subplot(projection="3d")
+    def tweakCoords(self, x, y, z):
+        return x, z, -y
+    
+    def adjustScale(self, scale, ax):
+        self.scale = scale
+        self.refreshFig(ax)
+    
+    def refreshFig(self, ax):
+        for organName in self.shownOrgans:
+            organ = self.atlas.organs[organName]
+            x, y, z = organ.linearizeDims()
+            x, y, z = self.tweakCoords(x, y, z)
+            x = np.array(x) * self.scale
+            y = np.array(y) * self.scale
+            z = np.array(z) * self.scale
+            x = x + self.offsetX
+            y = y + self.offsetY
+            z = z + self.offsetZ
+            ax.scatter(x, y, z, label=organName)
+        ax.legend()
+
+    
+
+    def setAnnotationFig(self, ax):
         minX = 10000
         maxX = 0
         minY = 10000
@@ -76,6 +102,7 @@ class AtlasProcessor:
         for organName in self.shownOrgans:
             organ = self.atlas.organs[organName]
             x, y, z = organ.linearizeDims()
+            x, y, z = self.tweakCoords(x, y, z)
             minX = min(minX, min(x))
             maxX = max(maxX, max(x))
             minY = min(minY, min(y))
@@ -98,3 +125,5 @@ class AtlasProcessor:
     def getCategories(self):
         return self.atlas.organs.keys()
         
+    def centreAtlas(self):
+        return self.atlas.centre()
