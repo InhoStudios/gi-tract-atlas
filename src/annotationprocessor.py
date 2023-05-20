@@ -17,11 +17,6 @@ class AtlasProcessor:
         self.offsetX = 0
         self.offsetY = 0
         self.offsetZ = 0
-        # self.root = Tk()
-        # self.frame = ttk.Frame(self.root, padding=10)
-        # self.frame.grid()
-        # ttk.Button(self.frame, text="Quit", command=self.root.destroy).grid(column=1, row=0)
-        # self.root.mainloop()
     
     def addAnnotation(self, filepath):
         if (self.calibration == None):
