@@ -41,9 +41,10 @@ class AtlasProcessor:
                 organ = self.atlas.organs[eName]
             except(KeyError):
                 organ = self.atlas.createOrgan(eName)
-            for point in entity["annotationBlocks"][0]["annotations"][0]["segments"][0]:
-                point.append(z)
-                organ.addPoint(point)
+            for point in entity["annotationBlocks"][0]["annotations"]:
+                for coord in point["segments"][0]:
+                    coord.append(z)
+                    organ.addPoint(coord)
         f.close()
         self.shownOrgans = list(self.getCategories())
         return
