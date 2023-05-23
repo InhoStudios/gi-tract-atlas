@@ -149,35 +149,35 @@ class App(tk.Tk):
         self.nifti.importImage(SPECT_path, "SPECT", 50, 0.02)
 
 if __name__=="__main__":
-    # app = App()
-    # app.mainloop()
+    app = App()
+    app.mainloop()
     # tk = Tk()
     # tk.title("Image Slices")
     # tk.geometry("1920x1080")
-    atlas.calibrate(join(ANNOTATIONS_FOLDER, "calibrate.json"), 27)
-    for file in listdir(ANNOTATIONS_FOLDER):
-        print(f"Processing {file}")
-        try:
-            atlas.addAnnotation(join(ANNOTATIONS_FOLDER, file))
-        except:
-            print(f"For {file}, error thrown")
-    # atlas.centreAtlas()
-    imgs = []
+    # atlas.calibrate(join(ANNOTATIONS_FOLDER, "calibrate.json"), 27)
+    # for file in listdir(ANNOTATIONS_FOLDER):
+    #     print(f"Processing {file}")
+    #     try:
+    #         atlas.addAnnotation(join(ANNOTATIONS_FOLDER, file))
+    #     except:
+    #         print(f"For {file}, error thrown")
+    # # atlas.centreAtlas()
+    # imgs = []
 
-    figure = Figure(figsize = (15, 10), dpi=100)
-    structure = "Stomach"
-    organ = atlas.atlas.organs[structure]
-    for level in set(organ.axes["z"]):
-        indices = np.where(np.array(organ.axes["z"]).astype(int) == int(level))
-        img = np.zeros((1600, 2560))
-        points = np.array(tuple([x, y] for x, y, 
-                       in zip(
-                           np.array(organ.axes["x"])[indices], 
-                           np.array(organ.axes["y"])[indices]))).astype(int)
-        print(level)
-        cv2.fillPoly(img, pts=[points], color=(1))
-        plt.imshow(img)
-        plt.show()
+    # figure = Figure(figsize = (15, 10), dpi=100)
+    # structure = "Stomach"
+    # organ = atlas.atlas.organs[structure]
+    # for level in set(organ.axes["z"]):
+    #     indices = np.where(np.array(organ.axes["z"]).astype(int) == int(level))
+    #     img = np.zeros((1600, 2560))
+    #     points = np.array(tuple([x, y] for x, y, 
+    #                    in zip(
+    #                        np.array(organ.axes["x"])[indices], 
+    #                        np.array(organ.axes["y"])[indices]))).astype(int)
+    #     print(level)
+    #     cv2.fillPoly(img, pts=[points], color=(1))
+    #     plt.imshow(img)
+    #     plt.show()
 
 
     # tk.mainloop()
