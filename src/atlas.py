@@ -25,8 +25,10 @@ class Atlas:
                     organ = self.organs[name]
                 except(KeyError):
                     organ = Organ(name, numSlices)
+                    self.organs[name] = organ
+                organ.appendOrganSlice(index, entity)
 
-    def calibrate(self, calibrationAnnotation, numSlices):
+    def calibrateDepth(self, calibrationAnnotation, numSlices):
         f = open(calibrationAnnotation)
         annotation = json.load(f)[0]
         body = annotation["annotation"]["annotationGroups"][0]["annotationEntities"][0]
@@ -39,6 +41,10 @@ class Atlas:
         self.calibration = int(diff / numSlices)
         self.calibrationFile = calibrationAnnotation
         return self.calibration
+    
+    def calibrateImgSize(self, inputNifti):
+        # TODO: use nifi image size to calibrate canvas size for voxelclouds
+        pass
 
 
 class Organ:
@@ -49,6 +55,9 @@ class Organ:
         # self.voxelCloud = n x m x z matrix
     
     def appendOrganSlice(self, index, entity):
+        for polygon in entity["annotationBlocks"][0]["annotations"]:
+            polyPts = polygon["segments"][0]
+            self.slices[index].append(polyPts.copy())
         pass
 
     def constructVoxelMap(self):
