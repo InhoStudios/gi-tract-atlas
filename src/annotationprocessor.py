@@ -57,7 +57,7 @@ class AtlasProcessor:
             zvals.append(point[1])
         minZ = min(zvals)
         maxZ = max(zvals)
-        diff = maxZ - minZ + 150
+        diff = maxZ - minZ
         self.calibration = diff / numZslices
         self.calibrationFile = calibrationAnnotation
         return self.calibration

@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import *
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 import numpy as np
 import cv2
 
@@ -34,13 +34,17 @@ class App(tk.Tk):
         self.minsize(1920, 1080)
 
     def initCanvas(self):
-        self.fig = Figure(figsize = (15, 10), dpi=100)
+        self.fig = Figure(figsize = (20, 13), dpi=100)
         self.ax = self.fig.add_subplot(projection="3d")
         self.atlas.setAnnotationFig(self.ax)
         self.nifti.setAnnotationFig(self.ax)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
+        
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self, pack_toolbar=False)
+        self.toolbar.grid(row=16, column=0)
+        self.toolbar.update()
 
         self.canvas.get_tk_widget().grid(row=0, column=0, rowspan=15, padx=25)
     
@@ -131,7 +135,7 @@ class App(tk.Tk):
             check.grid(row=i, column=1)
 
     def calibrateAtlas(self):
-        calibration = self.atlas.calibrate(join(ANNOTATIONS_FOLDER, "calibrate.json"), 27)
+        calibration = self.atlas.calibrate(join(ANNOTATIONS_FOLDER, "calibrate.json"), 20)
         print(calibration)
         for file in listdir(ANNOTATIONS_FOLDER):
             print(f"Processing {file}")

@@ -40,7 +40,7 @@ def loadImage(path):
 
 if __name__=="__main__":
     loadImages()
-    organ = body["Liver"]
+    organ = body["Jejunum"]
     precision = 1000
 
     window = Tk()
