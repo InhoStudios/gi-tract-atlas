@@ -36,6 +36,7 @@ def loadImage(path):
         img = np.zeros((2560, 2560))
         points = np.array(points).astype(int)
         cv2.fillPoly(img, pts=[points], color=(255, 255, 255))
+        img = cv2.GaussianBlur(img, (15,15), cv2.BORDER_DEFAULT)
         body[eName].append(img)
 
 if __name__=="__main__":
