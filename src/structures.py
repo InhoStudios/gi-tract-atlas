@@ -27,7 +27,7 @@ class Atlas:
             maxZ = max(maxZ, max(z))
         meanX = (minX + maxX) / 2
         meanY = (minY + maxY) / 2
-        print(meanX, meanY)
+        print(minX, minY)
         for organ in self.organs:
             self.organs[organ].axes["x"] = \
                 np.array(self.organs[organ].axes["x"]) - meanX

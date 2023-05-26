@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 
 from os.path import join
 
-# ct = nib.load(".\\assets\\images\\sample\\CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
-# spect = nib.load(".\\assets\\images\\sample\\SPECT_REG_TS_HEUHR_In111_free_M1039_0h_220721_171kev_04vox_16ss_6it_dc-ac.nii")
+ct = nib.load(".\\assets\\images\\sample\\CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
+spect = nib.load(".\\assets\\images\\sample\\SPECT_REG_TS_HEUHR_In111_free_M1039_0h_220721_171kev_04vox_16ss_6it_dc-ac.nii")
 
-# ct_arr = ct.get_fdata()
-# spect_arr = spect.get_fdata()
+ct_arr = ct.get_fdata()
+spect_arr = spect.get_fdata()
 
+print(ct.affine)
 
 # ct_x, ct_y, ct_z = np.where(ct_arr > 1200)
 # spect_x, spect_y, spect_z = np.where(spect_arr > 0.02)

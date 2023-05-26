@@ -34,7 +34,7 @@ class App(tk.Tk):
         self.minsize(1920, 1080)
 
     def initCanvas(self):
-        self.fig = Figure(figsize = (20, 13), dpi=100)
+        self.fig = Figure(figsize = (16, 10), dpi=100)
         self.ax = self.fig.add_subplot(projection="3d")
         self.atlas.setAnnotationFig(self.ax)
         self.nifti.setAnnotationFig(self.ax)
