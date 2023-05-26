@@ -6,8 +6,8 @@ import cv2
 
 import nibabel as nib
 
-OFFSET_X = 1630 - 17 * 6
-OFFSET_Y = 590 - 21 * 6
+OFFSET_X = 1630
+OFFSET_Y = 590
 
 class Atlas:
     def __init__(self, annotationDirectory, calibrationAnnotation) -> None:
@@ -16,7 +16,7 @@ class Atlas:
         self.xOffset: int = None
         self.yOffset: int = None
         self.zOffset: int = None
-        self.scale: float = 0.30
+        self.scale: float = 0.3
 
         self.atlasDims: tuple = None
         self.affine = None
@@ -86,6 +86,7 @@ class Atlas:
         shape = inputNifti.get_fdata().shape
         self.atlasDims = shape
         self.affine = inputNifti.affine
+        print(self.affine, type(self.affine))
         pass
 
     def constructImgVoxels(self):
@@ -109,6 +110,12 @@ class Organ:
         self.scale = scale
         self.depth = int(depth * scale)
         self.affine = affine
+        # offset: [offset_x, offset_y, offset_z]
+        self.offset = {
+            "x": OFFSET_X - 36 * 6,
+            "y": OFFSET_Y - 80 * 6,
+            "z": 55
+        }
         imgSliceDims = (numSlices, dims[1], dims[2])
         self.imageSlices: np.ndarray = np.zeros(imgSliceDims, dtype=np.uint8)
         self.voxelCloud: np.ndarray = np.zeros(dims, dtype=np.uint8)
@@ -117,14 +124,14 @@ class Organ:
         for polygon in entity["annotationBlocks"][0]["annotations"]:
             polyPts = np.array(polygon["segments"][0].copy()).astype(int)
             for i, pt in enumerate(polyPts):
-                polyPts[i] = [self.scale * (pt[1] - OFFSET_Y), self.scale * (pt[0] - OFFSET_X)]
+                polyPts[i] = [self.scale * (pt[1] - self.offset['y']), self.scale * (pt[0] - self.offset['x'])]
             self.slices[index].append(polyPts)
             cv2.fillPoly(self.imageSlices[index], pts=[polyPts], color=(255, 255, 255))
 
     def constructVoxelMap(self):
         for z in range(self.voxelCloud.shape[0]):
             # i: voxel layer
-            i = z - 39 * 3
+            i = z - self.offset['z']
             index = float(i) / self.depth
             ind0 = int(np.floor(index))
             if (ind0 < 0):
@@ -137,8 +144,14 @@ class Organ:
             img1 = cv2.GaussianBlur(img1, (9, 9), cv2.BORDER_DEFAULT)
             alpha = (float(i % self.depth)) / self.depth
             additiveImage = np.add(img0 *  (1.0 - alpha), img1 * alpha)
-            self.voxelCloud[i][np.where(additiveImage > 128)] = 255
+            self.voxelCloud[z][np.where(additiveImage > 128)] = 255
         
+        self.customCalibration()
+
         img = nib.Nifti1Image(self.voxelCloud, self.affine)
         nib.save(img, f".\\data\\{self.name}.nii")
         print(f"Saved {self.name} image at ./data/{self.name}.nii")
+    
+    def customCalibration(self):
+        self.voxelCloud = np.swapaxes(self.voxelCloud, 0, 1);
+        self.voxelCloud = self.voxelCloud[::-1,::-1,::-1]

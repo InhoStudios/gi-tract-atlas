@@ -10,7 +10,7 @@ spect = nib.load(".\\assets\\images\\sample\\SPECT_REG_TS_HEUHR_In111_free_M1039
 ct_arr = ct.get_fdata()
 spect_arr = spect.get_fdata()
 
-print(ct.affine)
+print(ct_arr.shape)
 
 # ct_x, ct_y, ct_z = np.where(ct_arr > 1200)
 # spect_x, spect_y, spect_z = np.where(spect_arr > 0.02)
