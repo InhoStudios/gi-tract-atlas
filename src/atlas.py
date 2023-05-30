@@ -112,8 +112,8 @@ class Organ:
         self.affine = affine
         # offset: [offset_x, offset_y, offset_z]
         self.offset = {
-            "x": OFFSET_X - 36 * 6,
-            "y": OFFSET_Y - 80 * 6,
+            "x": 424, # OFFSET_X - 36 * 6, # 424.2
+            "y": 33, # OFFSET_Y - 80 * 6, # 33
             "z": 55
         }
         imgSliceDims = (numSlices, dims[1], dims[2])
@@ -124,11 +124,11 @@ class Organ:
         for polygon in entity["annotationBlocks"][0]["annotations"]:
             polyPts = np.array(polygon["segments"][0].copy()).astype(int)
             for i, pt in enumerate(polyPts):
-                polyPts[i] = [self.scale * (pt[1] - self.offset['y']), self.scale * (pt[0] - self.offset['x'])]
+                polyPts[i] = [(self.scale * pt[1]) - self.offset['y'], (self.scale * pt[0]) - self.offset['x']]
             self.slices[index].append(polyPts)
             cv2.fillPoly(self.imageSlices[index], pts=[polyPts], color=(255, 255, 255))
 
-    def constructVoxelMap(self):
+    def constructVoxelMap(self, save=False):
         for z in range(self.voxelCloud.shape[0]):
             # i: voxel layer
             i = z - self.offset['z']
@@ -148,9 +148,10 @@ class Organ:
         
         self.customCalibration()
 
-        img = nib.Nifti1Image(self.voxelCloud, self.affine)
-        nib.save(img, f".\\data\\{self.name}.nii")
-        print(f"Saved {self.name} image at ./data/{self.name}.nii")
+        if (save):
+            img = nib.Nifti1Image(self.voxelCloud, self.affine)
+            nib.save(img, f".\\data\\{self.name}.nii")
+            print(f"Saved {self.name} image at ./data/{self.name}.nii")
     
     def customCalibration(self):
         self.voxelCloud = np.swapaxes(self.voxelCloud, 0, 1);
