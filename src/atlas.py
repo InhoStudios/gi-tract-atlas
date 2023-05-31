@@ -12,7 +12,7 @@ OFFSET_Y = 590
 class Atlas:
     def __init__(self, annotationDirectory, calibrationAnnotation) -> None:
         # TODO: Get directory length
-        self.calibration: int = None
+        self.calibration: float = None
         self.xOffset: int = None
         self.yOffset: int = None
         self.zOffset: int = None
@@ -28,40 +28,47 @@ class Atlas:
         ct = nib.load(".\\assets\\images\\sample\\CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
 
         annFiles = listdir(annotationDirectory)
-        numSlices = len(annFiles)
+        numSlices = 0
+        for file in annFiles:
+            annList = json.load(open(join(self.annotationDirectory, file)))
+            numSlices += len(annList)
 
         self.calibrateDepth(calibrationAnnotation, numSlices)
         self.calibrateImgSize(ct)
-        self.constructAtlasFromList(annFiles)
+        self.constructAtlasFromList(annFiles, numSlices)
         self.constructImgVoxels()
 
-    def constructAtlasFromList(self, fileList):
+    def constructAtlasFromList(self, fileList, numSlices):
         if (self.calibration == None):
             print("Requires calibration")
             return
-        numSlices = len(fileList)
+        # get number of slices
         for file in fileList:
             path = join(self.annotationDirectory, file)
             if (path == self.calibrationFile):
                 print("Calibration file. Skipping...")
                 continue
             print(f"Reading file {file}")
-            annotation = json.load(open(path))[0]
-            fname = annotation["documents"][0]["name"]
-            index = int(fname.split('.')[0].replace("rat",""))
-            for entity in annotation["annotation"]["annotationGroups"][0]["annotationEntities"]:
-                name = entity["name"]
+            annotationList = json.load(open(path))
+            for annotation in annotationList:
+                fname = annotation["documents"][0]["name"]
+                index = int(fname.split('.')[0].replace("rat",""))
                 try:
-                    organ = self.organs[name]
-                except(KeyError):
-                    organ = Organ(name, 
-                                    numSlices, 
-                                    self.scale, 
-                                    self.calibration, 
-                                    self.atlasDims,
-                                    self.affine)
-                    self.organs[name] = organ
-                organ.appendOrganSlice(index, entity)
+                    for entity in annotation["annotation"]["annotationGroups"][0]["annotationEntities"]:
+                        name = entity["name"]
+                        try:
+                            organ = self.organs[name]
+                        except(KeyError):
+                            organ = Organ(name, 
+                                            numSlices, 
+                                            self.scale, 
+                                            self.calibration, 
+                                            self.atlasDims,
+                                            self.affine)
+                            self.organs[name] = organ
+                        organ.appendOrganSlice(index, entity)
+                except:
+                    print(annotation)
 
     def calibrateDepth(self, calibrationAnnotation, numSlices):
         f = open(calibrationAnnotation)
@@ -73,7 +80,7 @@ class Atlas:
         minZ = min(domain)
         maxZ = max(domain)
         diff = maxZ - minZ
-        self.calibration = int(diff / numSlices)
+        self.calibration = 1.0 * float(diff) / float(numSlices)
         self.calibrationFile = calibrationAnnotation
         return self.calibration
     
@@ -98,7 +105,7 @@ class Atlas:
                 continue
             if (organ != None):
                 print(f"Constructing voxel map for {organName}")
-                organ.constructVoxelMap()
+                organ.constructVoxelMap(True)
                 print("Done")
 
 
@@ -108,13 +115,13 @@ class Organ:
         self.numSlices = numSlices
         self.slices = [[]] * numSlices
         self.scale = scale
-        self.depth = int(depth * scale)
+        self.depth = depth * scale
         self.affine = affine
         # offset: [offset_x, offset_y, offset_z]
         self.offset = {
-            "x": 424, # OFFSET_X - 36 * 6, # 424.2
-            "y": 33, # OFFSET_Y - 80 * 6, # 33
-            "z": 55
+            "x": 124, # OFFSET_X - 36 * 6, # 424.2
+            "y": 45, # OFFSET_Y - 80 * 6, # 33
+            "z": 50 # 65
         }
         imgSliceDims = (numSlices, dims[1], dims[2])
         self.imageSlices: np.ndarray = np.zeros(imgSliceDims, dtype=np.uint8)
@@ -142,9 +149,9 @@ class Organ:
             img1 = self.imageSlices[ind0 + 1]
             img0 = cv2.GaussianBlur(img0, (9, 9), cv2.BORDER_DEFAULT)
             img1 = cv2.GaussianBlur(img1, (9, 9), cv2.BORDER_DEFAULT)
-            alpha = (float(i % self.depth)) / self.depth
+            alpha = (float(i % int(np.round(self.depth)) ) ) / (self.depth)
             additiveImage = np.add(img0 *  (1.0 - alpha), img1 * alpha)
-            self.voxelCloud[z][np.where(additiveImage > 128)] = 255
+            self.voxelCloud[z][np.where(additiveImage > 196)] = 255
         
         self.customCalibration()
 
@@ -156,3 +163,8 @@ class Organ:
     def customCalibration(self):
         self.voxelCloud = np.swapaxes(self.voxelCloud, 0, 1);
         self.voxelCloud = self.voxelCloud[::-1,::-1,::-1]
+
+        # smooth between slices
+        for i, img in enumerate(self.voxelCloud):
+            # smoothImg = 
+            self.voxelCloud[i] = cv2.GaussianBlur(img, (13, 13), cv2.BORDER_DEFAULT)
