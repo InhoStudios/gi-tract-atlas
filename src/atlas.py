@@ -26,7 +26,7 @@ class Atlas:
 
         self.annotationDirectory = annotationDirectory
 
-        ct = nib.load(".\\assets\\images\\sample\\CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
+        ct = nib.load("./assets/images/sample/CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
 
         annFiles = listdir(annotationDirectory)
         numSlices = 0
@@ -158,7 +158,7 @@ class Organ:
 
         if (save):
             img = nib.Nifti1Image(self.voxelCloud, self.affine)
-            nib.save(img, f".\\data\\{self.name}.nii")
+            nib.save(img, f"./data/{self.name}.nii")
             print(f"Saved {self.name} image at ./data/{self.name}.nii")
     
     def customCalibration(self):
