@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.measure import marching_cubes
 from os.path import join
 from os import listdir
 import json
@@ -168,3 +169,10 @@ class Organ:
         for i, img in enumerate(self.voxelCloud):
             # smoothImg = 
             self.voxelCloud[i] = cv2.GaussianBlur(img, (13, 13), cv2.BORDER_DEFAULT)
+        
+    def getMesh(self):
+        threshold = 196
+        step_size = 2
+        print("Getting mesh")
+        vertices, faces, _, _ = marching_cubes(self.voxelCloud, level=threshold, step_size=step_size)
+        return vertices, faces
