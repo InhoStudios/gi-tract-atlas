@@ -11,7 +11,7 @@ OFFSET_X = 1630
 OFFSET_Y = 590
 
 class Atlas:
-    def __init__(self, annotationDirectory, calibrationAnnotation) -> None:
+    def __init__(self, annotationDirectory, calibrationAnnotation, save=False) -> None:
         # TODO: Get directory length
         self.calibration: float = None
         self.xOffset: int = None
@@ -37,7 +37,7 @@ class Atlas:
         self.calibrateDepth(calibrationAnnotation, numSlices)
         self.calibrateImgSize(ct)
         self.constructAtlasFromList(annFiles, numSlices)
-        self.constructImgVoxels()
+        self.constructImgVoxels(save=save)
 
     def constructAtlasFromList(self, fileList, numSlices):
         if (self.calibration == None):
@@ -97,7 +97,7 @@ class Atlas:
         print(self.affine, type(self.affine))
         pass
 
-    def constructImgVoxels(self):
+    def constructImgVoxels(self, save=False):
         for organName in self.organs:
             organ = None
             try:
@@ -106,7 +106,7 @@ class Atlas:
                 continue
             if (organ != None):
                 print(f"Constructing voxel map for {organName}")
-                organ.constructVoxelMap(True)
+                organ.constructVoxelMap(save)
                 print("Done")
 
 
@@ -171,8 +171,8 @@ class Organ:
             self.voxelCloud[i] = cv2.GaussianBlur(img, (13, 13), cv2.BORDER_DEFAULT)
         
     def getMesh(self):
-        threshold = 196
-        step_size = 2
+        threshold = 50
+        step_size = 3
         print("Getting mesh")
         vertices, faces, _, _ = marching_cubes(self.voxelCloud, level=threshold, step_size=step_size)
         return vertices, faces
