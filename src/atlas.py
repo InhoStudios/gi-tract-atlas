@@ -17,7 +17,6 @@ class Atlas:
         self.xOffset: int = None
         self.yOffset: int = None
         self.zOffset: int = None
-        self.scale: float = 0.3
 
         self.atlasDims: tuple = None
         self.affine = None
@@ -27,6 +26,7 @@ class Atlas:
         self.annotationDirectory = annotationDirectory
 
         ct = nib.load("./assets/images/sample/CT_TS_HEUHR_In111_free_M1039_0h_220721-selfcal.nii")
+        ct = nib.load(join("assets", "images", "sagittal_mouse.nii"))
 
         annFiles = listdir(annotationDirectory)
         numSlices = 0
@@ -62,7 +62,6 @@ class Atlas:
                         except(KeyError):
                             organ = Organ(name, 
                                             numSlices, 
-                                            self.scale, 
                                             self.calibration, 
                                             self.atlasDims,
                                             self.affine)
@@ -111,18 +110,18 @@ class Atlas:
 
 
 class Organ:
-    def __init__(self, name, numSlices, scale, depth, dims, affine) -> None:
+    def __init__(self, name, numSlices, depth, dims, affine) -> None:
         self.name = name
         self.numSlices = numSlices
         self.slices = [[]] * numSlices
-        self.scale = scale
-        self.depth = depth * scale
+        self.scale = 1.0
+        self.depth = depth * self.scale
         self.affine = affine
         # offset: [offset_x, offset_y, offset_z]
         self.offset = {
-            "x": 124, # OFFSET_X - 36 * 6, # 424.2
-            "y": 45, # OFFSET_Y - 80 * 6, # 33
-            "z": 50 # 65
+            "x": 1180,# 124, # OFFSET_X - 36 * 6, # 424.2
+            "y": 1812,# 45, # OFFSET_Y - 80 * 6, # 33
+            "z": 0# 50 # 65
         }
         imgSliceDims = (numSlices, dims[1], dims[2])
         self.imageSlices: np.ndarray = np.zeros(imgSliceDims, dtype=np.uint8)

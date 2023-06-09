@@ -1,15 +1,20 @@
 from atlas import Atlas
+from construct_imaios_mesh import IMAIOSMesh
 import numpy as np
 import cv2
 import nibabel as nib
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from os.path import join
 
 def displayOrgan(organName, atlas, fig):
     organ = atlas.organs[organName]
     vertices, faces = organ.getMesh()
     # fig.mesh_3d(x=vertices[:, 0], y=vertices[:, 1], z=vertices[:, 2], faces=faces)
+    return getMeshFromVerticesAndFaces(vertices, faces)
+
+def getMeshFromVerticesAndFaces(vertices, faces):
     return go.Mesh3d(
         x=vertices[:, 0], 
         y=vertices[:, 1], 
@@ -19,12 +24,14 @@ def displayOrgan(organName, atlas, fig):
         k=faces[:, 2])
     
 if __name__=="__main__":
-    atlas = Atlas("./assets/annotations", "./assets/annotations/calibrate.json")
+    atlas = Atlas(join("assets", "annotations"), join("assets", "annotations", "calibrate.json"))
+    mouse = IMAIOSMesh()
     # ax = plt.figure().add_subplot(projection='3d')
     meshes = []
     for organName in atlas.organs:
         mesh = displayOrgan(organName, atlas, None)
         meshes.append(mesh)
+    meshes.append(getMeshFromVerticesAndFaces(*mouse.getMesh()))
     fig = go.Figure(data=meshes)
     fig.update_layout(
         scene = dict(
