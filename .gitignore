@@ -3,3 +3,6 @@ src/__pycache__/
 venv/*
 **/images/*
 data/*
+data
+old_data/
+old_data

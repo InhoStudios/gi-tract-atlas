@@ -4,6 +4,7 @@ from skimage.measure import marching_cubes
 from os.path import join
 from os import listdir
 import cv2
+import plyfile
 
 class IMAIOSMesh:
     def __init__(self) -> None:
@@ -13,6 +14,8 @@ class IMAIOSMesh:
         self.voxels = self.nifti.get_fdata()
         print("generating mesh")
         self.generateMesh()
+        del self.voxels
+        del self.nifti
 
     def generateMesh(self):
         threshold = 0.92 * np.max(self.voxels)
