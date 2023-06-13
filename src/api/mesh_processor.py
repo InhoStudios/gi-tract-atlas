@@ -7,14 +7,37 @@ import plotly.graph_objects as go
 # read mesh
 
 class Mesh:
-    def __init__(self, vertices:np.ndarray, faces:np.ndarray):
+    def __init__(self, vertices:np.ndarray, faces:np.ndarray) -> None:
+        """
+        Parameters
+        vertices: input vertices from marching_cubes
+        faces: input faces from marching_cubes
+        """
         self.vertices = vertices
         self.faces = faces
     
-    def save_mesh(self, file_path:str):
-        pass
+    def saveMesh(self, file_path:str) -> bool:
+        """
+        Parameters
+        file_path: path to save the mesh to
+        Returns
+        true on success, false on failure
+        """
+        try:
+            mesh = meshio.Mesh(self.vertices, {"triangle": self.faces})
+            meshio.write(file_path, mesh, file_format="obj")
 
-def generate_mesh_from_voxels(voxels:np.ndarray, threshold:int=None, step_size:int=1, save_file:str=None) -> tuple[np.ndarray, np.ndarray]:
+            return True
+        except:
+            return False
+    
+    def getVertices(self) -> np.ndarray:
+        return self.vertices
+    
+    def getFaces(self) -> np.ndarray:
+        return self.faces
+
+def generate_mesh_from_voxels(voxels:np.ndarray, *, threshold:int=None, step_size:int=1, save_file:str=None) -> Mesh:
     """
     Parameters:
     voxels: 3D array of voxels (from nifti, or generated)
@@ -23,37 +46,54 @@ def generate_mesh_from_voxels(voxels:np.ndarray, threshold:int=None, step_size:i
     save_file: file path to save .obj file to. if not set, no file is saved
     
     Returns:
-    vertices: list of vertices
-    faces: list of triangles
+    Mesh: mesh object of vertices and faces
     """
     if (threshold == None):
         maxval = np.max(voxels)
         threshold = int(maxval * 0.95)
-    vertices, faces, _, _ = marching_cubes(voxels, threshold, step_size)
+    vertices, faces, _, _ = marching_cubes(voxels, level=threshold, step_size=step_size)
+    mesh = Mesh(vertices, faces)
     if (save_file != None):
-        mesh = meshio.Mesh(vertices, {"triangle": faces})
-        meshio.write(save_file, mesh, file_format="obj")
+        mesh.saveMesh(save_file)
 
-    return vertices, faces
+    return mesh
 
 
-def read_mesh_from_file(file:str) -> tuple[np.ndarray, np.ndarray]:
+def read_mesh_from_file(file:str) -> Mesh:
     """
     Parameters:
     file: .obj file path to read mesh from
 
     Returns:
-    vertices: list of vertices
-    faces: list of triangles
+    Mesh: mesh object of vertices and faces
     """
     mesh = meshio.read("mesh.obj")
     vertices = mesh.points
     faces = mesh.cells["triangle"]
 
-    return vertices, faces
+    return Mesh(vertices, faces)
 
-def visualize_meshes(meshes:list):
+def visualize_meshes(meshes:list[Mesh]) -> go.Figure:
+    """
+    Parameters:
+    meshes: list of all Meshes you want to render
+
+    Returns:
+    figure: Plotly GO figure
+    """
     data = []
     for mesh in meshes:
-        pass
-    figure = go.Figure(data=meshes)
+        vertices = mesh.getVertices()
+        faces = mesh.getFaces()
+        go_mesh = go.Mesh3d(
+            x=vertices[:, 0], 
+            y=vertices[:, 1], 
+            z=vertices[:, 2], 
+            i=faces[:, 0],
+            j=faces[:, 1],
+            k=faces[:, 2]
+        )
+        data.append(go_mesh)
+    figure = go.Figure(data=data)
+    figure.show()
+    return figure
