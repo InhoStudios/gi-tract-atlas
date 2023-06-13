@@ -24,7 +24,7 @@ def getMeshFromVerticesAndFaces(vertices, faces):
         k=faces[:, 2])
     
 if __name__=="__main__":
-    atlas = Atlas(join("assets", "annotations"), join("assets", "annotations", "calibrate.json"))
+    atlas = Atlas(join("assets", "annotations"), join("assets", "annotations", "calibrate.json"), save=True)
     nifti_mouse = nib.load(join("assets", "images", "sagittal_mouse.nii")).get_fdata()
     # slice1 = 500
     # slice2 = 610

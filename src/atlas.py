@@ -5,7 +5,7 @@ from os import listdir
 import json
 import cv2
 
-import plyfile
+import meshio
 import nibabel as nib
 
 OFFSET_X = 1630
@@ -155,7 +155,7 @@ class Organ:
             self.voxelCloud[z][np.where(additiveImage > 196)] = 255
         
         self.customCalibration()
-        self.generateMesh()
+        self.generateMesh(save)
 
         if (save):
             img = nib.Nifti1Image(self.voxelCloud, self.affine)
@@ -174,13 +174,19 @@ class Organ:
             # smoothImg = 
             self.voxelCloud[i] = cv2.GaussianBlur(img, (27, 27), cv2.BORDER_DEFAULT)
         
-    def generateMesh(self):
+    def generateMesh(self, save=False):
         threshold = 50
         step_size = 3
         print("Getting mesh")
         vertices, faces, _, _ = marching_cubes(self.voxelCloud, level=threshold, step_size=step_size)
         self.vertices = vertices
         self.faces = faces
+        if (save):
+            self.saveMesh()
 
     def getMesh(self):
         return self.vertices, self.faces
+
+    def saveMesh(self):
+        mesh = meshio.Mesh(self.vertices, {"triangle": self.faces})
+        meshio.write(f"./data/{self.name}.obj", mesh, file_format="obj")
