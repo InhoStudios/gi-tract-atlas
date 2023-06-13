@@ -37,13 +37,13 @@ class Mesh:
     def getFaces(self) -> np.ndarray:
         return self.faces
 
-def generate_mesh_from_voxels(voxels:np.ndarray, *, threshold:int=None, step_size:int=1, save_file:str=None) -> Mesh:
+def generate_mesh_from_voxels(voxels:np.ndarray, *, threshold:int=None, step_size:int=1, file_path:str=None) -> Mesh:
     """
     Parameters:
     voxels: 3D array of voxels (from nifti, or generated)
     threshold: threshold level to include from voxels in volume mesh. if not set, threshold is 95% of the maximum value
     step_size: step size for creating vertices
-    save_file: file path to save .obj file to. if not set, no file is saved
+    file_path: file path to save .obj file to. if not set, no file is saved
     
     Returns:
     Mesh: mesh object of vertices and faces
@@ -53,23 +53,23 @@ def generate_mesh_from_voxels(voxels:np.ndarray, *, threshold:int=None, step_siz
         threshold = int(maxval * 0.95)
     vertices, faces, _, _ = marching_cubes(voxels, level=threshold, step_size=step_size)
     mesh = Mesh(vertices, faces)
-    if (save_file != None):
-        mesh.saveMesh(save_file)
+    if (file_path != None):
+        mesh.saveMesh(file_path)
 
     return mesh
 
 
-def read_mesh_from_file(file:str) -> Mesh:
+def read_mesh_from_file(file_path:str) -> Mesh:
     """
     Parameters:
-    file: .obj file path to read mesh from
+    file_path: .obj file path to read mesh from
 
     Returns:
     Mesh: mesh object of vertices and faces
     """
-    mesh = meshio.read("mesh.obj")
+    mesh = meshio.read(file_path)
     vertices = mesh.points
-    faces = mesh.cells["triangle"]
+    faces = mesh.cells_dict["triangle"]
 
     return Mesh(vertices, faces)
 
