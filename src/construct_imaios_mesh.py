@@ -4,7 +4,8 @@ from skimage.measure import marching_cubes
 from os.path import join
 from os import listdir
 import cv2
-import plyfile
+from api import mesh_processor
+from api.mesh_processor import Mesh
 
 class IMAIOSMesh:
     def __init__(self) -> None:
@@ -23,6 +24,8 @@ class IMAIOSMesh:
         step_size = 3
         self.vertices, self.faces, _, _ = marching_cubes(self.voxels, level=threshold, step_size=step_size)
         print("mesh generated")
+        mesh = Mesh(self.vertices, self.faces)
+        mesh.saveMesh("./data/skeleton.obj")
 
     def getMesh(self):
         return self.vertices, self.faces

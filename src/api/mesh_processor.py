@@ -73,7 +73,7 @@ def read_mesh_from_file(file_path:str) -> Mesh:
 
     return Mesh(vertices, faces)
 
-def visualize_meshes(meshes:list[Mesh]) -> go.Figure:
+def visualize_meshes(meshes:list) -> go.Figure:
     """
     Parameters:
     meshes: list of all Meshes you want to render
