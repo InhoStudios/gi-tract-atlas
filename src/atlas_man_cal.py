@@ -12,7 +12,7 @@ import nibabel as nib
 OFFSET_X = 1630
 OFFSET_Y = 590
 
-class Atlas:
+class ManCalAtlas:
     def __init__(self, annotationDirectory, calibrationAnnotation, save=False) -> None:
         # TODO: Get directory length
         self.calibration: float = None
@@ -62,7 +62,7 @@ class Atlas:
                         try:
                             organ = self.organs[name]
                         except(KeyError):
-                            organ = Organ(name, 
+                            organ = ManCalOrgan(name, 
                                             numSlices, 
                                             self.calibration, 
                                             self.atlasDims,
@@ -111,19 +111,19 @@ class Atlas:
                 print("Done")
 
 
-class Organ:
+class ManCalOrgan:
     def __init__(self, name, numSlices, depth, dims, affine) -> None:
         self.name = name
         self.numSlices = numSlices
         self.slices = [[]] * numSlices
-        self.scale = 1.0
+        self.scale = 0.3
         self.depth = depth * self.scale
         self.affine = affine
         # offset: [offset_x, offset_y, offset_z]
         self.offset = {
-            "x": 250, # 124, # OFFSET_X - 36 * 6, # 424.2
-            "y": 173, # 45, # OFFSET_Y - 80 * 6, # 33
-            "z": 385 # 50 # 65
+            "x": 124, # OFFSET_X - 36 * 6, # 424.2
+            "y": 45, # OFFSET_Y - 80 * 6, # 33
+            "z": 50 # 65
         }
         imgSliceDims = (numSlices, dims[1], dims[2])
         self.imageSlices: np.ndarray = np.zeros(imgSliceDims, dtype=np.uint8)
@@ -149,19 +149,19 @@ class Organ:
                 break
             img0 = self.imageSlices[ind0]
             img1 = self.imageSlices[ind0 + 1]
-            img0 = cv2.GaussianBlur(img0, (27, 27), cv2.BORDER_DEFAULT)
-            img1 = cv2.GaussianBlur(img1, (27, 27), cv2.BORDER_DEFAULT)
+            img0 = cv2.GaussianBlur(img0, (15, 15), cv2.BORDER_DEFAULT)
+            img1 = cv2.GaussianBlur(img1, (15, 15), cv2.BORDER_DEFAULT)
             alpha = (float(i % int(np.round(self.depth)) ) ) / (self.depth)
             additiveImage = np.add(img0 *  (1.0 - alpha), img1 * alpha)
-            self.voxelCloud[z][np.where(additiveImage > 196)] = 255
+            self.voxelCloud[z][np.where(additiveImage > 160)] = 255
         
         self.customCalibration()
         self.generateMesh(save)
 
         if (save):
             img = nib.Nifti1Image(self.voxelCloud, self.affine)
-            nib.save(img, f"./data/{self.name}.nii")
-            print(f"Saved {self.name} image at ./data/{self.name}.nii")
+            nib.save(img, f"./data/cal_{self.name}.nii")
+            print(f"Saved {self.name} image at ./data/cal_{self.name}.nii")
             del self.imageSlices
             del self.slices
             del self.voxelCloud
@@ -188,4 +188,4 @@ class Organ:
 
     def saveMesh(self):
         mesh = meshio.Mesh(self.vertices, {"triangle": self.faces})
-        meshio.write(f"./data/{self.name}.obj", mesh, file_format="obj")
+        meshio.write(f"./data/cal_{self.name}.obj", mesh, file_format="obj")
