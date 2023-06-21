@@ -153,7 +153,7 @@ class Organ:
             img1 = cv2.GaussianBlur(img1, (27, 27), cv2.BORDER_DEFAULT)
             alpha = (float(i % int(np.round(self.depth)) ) ) / (self.depth)
             additiveImage = np.add(img0 *  (1.0 - alpha), img1 * alpha)
-            self.voxelCloud[z][np.where(additiveImage > 196)] = 255
+            self.voxelCloud[z] = additiveImage # [np.where(additiveImage > 196)] = 255
         
         self.customCalibration()
         self.generateMesh(save)
@@ -171,7 +171,8 @@ class Organ:
         self.voxelCloud = self.voxelCloud[::-1,::-1,::]
 
         # smooth between slices
-        self.voxelCloud[np.where(gaussian_filter(self.voxelCloud, 33) > 170)] = 255
+        self.voxelCloud = gaussian_filter(self.voxelCloud, 33)
+        self.voxelCloud[np.where(self.voxelCloud > 196)] = 255
         
     def generateMesh(self, save=False):
         threshold = 50
