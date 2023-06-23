@@ -149,8 +149,8 @@ class Organ:
                 break
             img0 = self.imageSlices[ind0]
             img1 = self.imageSlices[ind0 + 1]
-            img0 = cv2.GaussianBlur(img0, (27, 27), cv2.BORDER_DEFAULT)
-            img1 = cv2.GaussianBlur(img1, (27, 27), cv2.BORDER_DEFAULT)
+            img0 = cv2.GaussianBlur(img0, (17, 17), cv2.BORDER_DEFAULT)
+            img1 = cv2.GaussianBlur(img1, (17, 17), cv2.BORDER_DEFAULT)
             alpha = (float(i % int(np.round(self.depth)) ) ) / (self.depth)
             additiveImage = np.add(img0 *  (1.0 - alpha), img1 * alpha)
             self.voxelCloud[z] = additiveImage # [np.where(additiveImage > 196)] = 255
@@ -171,8 +171,9 @@ class Organ:
         self.voxelCloud = self.voxelCloud[::-1,::-1,::]
 
         # smooth between slices
-        self.voxelCloud = gaussian_filter(self.voxelCloud, 33)
-        self.voxelCloud[np.where(self.voxelCloud > 196)] = 255
+        self.voxelCloud = gaussian_filter(self.voxelCloud, 15)
+        self.voxelCloud[np.where(self.voxelCloud > 100)] = 255
+        self.voxelCloud[np.where(self.voxelCloud <= 100)] = 0
         
     def generateMesh(self, save=False):
         threshold = 50
