@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 
 # generate mesh from voxel
 # read mesh
-
 class Mesh:
     def __init__(self, vertices:np.ndarray, faces:np.ndarray) -> None:
         """
@@ -58,7 +57,6 @@ def generate_mesh_from_voxels(voxels:np.ndarray, *, threshold:int=None, step_siz
 
     return mesh
 
-
 def read_mesh_from_file(file_path:str) -> Mesh:
     """
     Parameters:
@@ -95,5 +93,25 @@ def visualize_meshes(meshes:list) -> go.Figure:
         )
         data.append(go_mesh)
     figure = go.Figure(data=data)
-    figure.show()
     return figure
+
+def decimate_mesh(mesh: Mesh, num_vertices: int) -> Mesh:
+    """
+    Parameters:
+    mesh: input Mesh object
+    num_vertices: the target number of vertices to decimate to
+
+    Returns:
+    mesh: decimated mesh
+    """
+    num_faces = 3 * num_vertices
+    ms = ml.MeshSet()
+    pml_mesh = PMLMesh(mesh.vertices, mesh.faces)
+    ms.add_mesh(pml_mesh)
+    while (ms.current_mesh().vertex_number() > num_vertices):
+        ms.apply_filter("meshing_decimation_quadric_edge_collapse", targetfacenum=num_faces, preservenormal=True)
+        num_faces = num_faces - (ms.current_mesh().vertex_number() - num_vertices)
+    
+    m = ms.current_mesh()
+    print('Output mesh has', m.vertex_number(), 'vertex and', m.face_number(), 'faces')
+    return Mesh(m.vertex_matrix(), m.face_matrix())

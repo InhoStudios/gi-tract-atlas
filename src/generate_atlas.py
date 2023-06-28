@@ -1,4 +1,4 @@
-from atlas import Atlas
+from api.gen_nii_atlas import Atlas
 from atlas_man_cal import ManCalAtlas
 from construct_imaios_mesh import IMAIOSMesh
 import numpy as np

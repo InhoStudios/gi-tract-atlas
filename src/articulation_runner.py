@@ -1,7 +1,7 @@
 from skimage.measure import marching_cubes
 import nibabel as nib
 from os.path import join
-from api import mesh_processor as mp
+from . import mesh_processor as mp
 
 # voxels = nib.load(join("data", "stomach.nii")).get_fdata()
 

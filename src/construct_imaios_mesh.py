@@ -4,7 +4,7 @@ from skimage.measure import marching_cubes
 from os.path import join
 from os import listdir
 import cv2
-from api import mesh_processor
+from . import mesh_processor
 from api.mesh_processor import Mesh
 
 class IMAIOSMesh:

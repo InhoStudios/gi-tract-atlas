@@ -191,3 +191,6 @@ class Organ:
     def saveMesh(self):
         mesh = meshio.Mesh(self.vertices, {"triangle": self.faces})
         meshio.write(f"./data/{self.name}.obj", mesh, file_format="obj")
+
+if __name__=="__main__":
+    atlas = Atlas(join("assets", "annotations"), join("assets", "annotations", "calibrate.json"), save=True)
