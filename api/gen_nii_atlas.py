@@ -168,7 +168,7 @@ class Organ:
     
     def customCalibration(self):
         self.voxelCloud = np.swapaxes(self.voxelCloud, 0, 1);
-        self.voxelCloud = self.voxelCloud[::-1,::-1,::]
+        self.voxelCloud = self.voxelCloud[::-1,::-1,::-1]
 
         # smooth between slices
         self.voxelCloud = gaussian_filter(self.voxelCloud, 15)
